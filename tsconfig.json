@@ -3,7 +3,8 @@
     "outDir": "build",
     "target": "esnext",
     "module": "commonjs",
-    "esModuleInterop": true
+    "esModuleInterop": true,
+    "resolveJsonModule": true,
   },
   "include": [
     "src/**/*"

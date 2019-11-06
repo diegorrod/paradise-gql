@@ -1,19 +1,34 @@
 import { gql } from 'apollo-server-express';
+import { GQLExtension } from '../misc/SetServer';
 
-export interface Test {
-  message: string;
+export class Test implements GQLExtension {
+  // Definicion
+  Def = gql`
+    type Test {
+      message: String
+    }
+
+    extend type Query {
+      getMessage(text: String): Test
+    }
+
+    extend type Mutation {
+      setMessage(text: String): Boolean
+    }
+  `;
+
+  // Query
+  Query = {
+    getMessage: (root, args): { message: string } => {
+      return { message: args.text };
+    },
+  };
+
+  // Mutation
+  Mutation = {
+    setMessage: (): boolean => true,
+  };
+
+  // Resolvers
+  Resolvers = {};
 }
-
-export const TestDefType = gql`
-  type Test {
-    message: String
-  }
-`;
-
-export const TestQueries = {
-  test: (): {} => {
-    return {
-      message: 'Esto es una prueba',
-    };
-  },
-};
