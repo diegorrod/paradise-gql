@@ -1,6 +1,6 @@
 {
   "name": "paradise-gql",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "main": "index.js",
   "license": "MIT",
   "dependencies": {
@@ -37,6 +37,7 @@
     "start": "node --inspect=5858 -r ts-node/register ./src/index.ts",
     "start:watch": "nodemon",
     "build": "tsc",
-    "lint": "eslint src/** --fix"
+    "lint": "eslint src/** --fix",
+    "apollo": "apollo service:push --endpoint=http://localhost:8888/graphq"
   }
 }

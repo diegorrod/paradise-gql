@@ -11,6 +11,14 @@ export interface Query {
   }[];
 }
 
+export interface QueryInfo {
+  totalRows: number;
+  page: number;
+  pageRows: number;
+  rowsPerPage: number;
+  pages: number;
+}
+
 export class Paradise {
   // Variable estatica de la base de datos
   private static paradiseDB: Request;
@@ -35,8 +43,12 @@ export class Paradise {
   }
 
   // Ejecutar nueva consulta en la base de datos
-  private static async ExectuteQuery(q: Query): Promise<sql.IResult<{}>> {
+  private static async ExectuteQuery(q: Query): Promise<{ result: sql.IResult<{}>; info: QueryInfo }> {
     const { tabla, consultas } = q;
+    let infoCountQuery = `
+      SELECT COUNT(*) as count
+      FROM ${q.tabla}
+    `;
     let query = `select * from ${tabla}`;
     if (consultas) {
       let queryWhere = ' where';
@@ -48,18 +60,30 @@ export class Paradise {
         }
       });
       query += queryWhere;
+      infoCountQuery += queryWhere;
     }
     const request = await Paradise.Request();
     const result = await request.query(query);
-    return result;
+    const info: QueryInfo = {
+      totalRows: (await request.query(infoCountQuery)).recordset[0].count,
+      page: 1,
+      pageRows: 0,
+      pages: 1,
+      rowsPerPage: 0,
+    };
+    console.log(info);
+    return {
+      result,
+      info,
+    };
   }
 
   // Obtener valores de una tabla basados en una consulta
-  public static async Get(q: Query): Promise<any[]> {
+  public static async Get(q: Query): Promise<{ data: any[]; info: QueryInfo }> {
     try {
-      const result = await this.ExectuteQuery(q);
+      const { result, info } = await this.ExectuteQuery(q);
 
-      if (result.recordset.length === 0) return [];
+      if (result.recordset.length === 0) return { data: [], info };
 
       const data = [];
 
@@ -76,16 +100,16 @@ export class Paradise {
         data.push(recordData);
       });
 
-      return data;
+      return { data, info };
     } catch (error) {
       console.log(error);
     }
   }
 
   // Obtener un valor de una tabla basado en una consulta
-  public static async GetOne(q: Query, toLowerCase = true): Promise<any> {
+  public static async GetOne(q: Query, toLowerCase = true): Promise<{ data: any; info: QueryInfo }> {
     try {
-      const result = await this.ExectuteQuery(q);
+      const { result, info } = await this.ExectuteQuery(q);
 
       if (result.recordset.length === 0) return undefined;
 
@@ -103,7 +127,7 @@ export class Paradise {
         data[element[0]] = element[1];
       });
 
-      return data;
+      return { data, info };
     } catch (error) {
       console.log(error);
     }

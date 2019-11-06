@@ -20,7 +20,7 @@ export class Auth implements GQLExtension {
 
       // Busco en la DB el usuario
       try {
-        userResult = await Paradise.GetOne(
+        userResult = (await Paradise.GetOne(
           {
             tabla: 'USUARIOS',
             consultas: [
@@ -32,7 +32,7 @@ export class Auth implements GQLExtension {
             ],
           },
           false,
-        );
+        )).data;
       } catch (error) {
         console.log(error);
       }
@@ -69,7 +69,7 @@ export class Auth implements GQLExtension {
         ],
       });
 
-      for (const { PerPrcId } of permisos) {
+      for (const { PerPrcId } of permisos.data) {
         if (!roles.includes(PerPrcId)) roles.push(PerPrcId);
       }
 
@@ -84,8 +84,8 @@ export class Auth implements GQLExtension {
         ],
       });
 
-      for (const { UsuGruPerId } of usuario1) {
-        const permigrupo = await Paradise.Get({
+      for (const { UsuGruPerId } of usuario1.data) {
+        const { data } = await Paradise.Get({
           tabla: 'PERMIGRUPO',
           consultas: [
             {
@@ -95,7 +95,7 @@ export class Auth implements GQLExtension {
             },
           ],
         });
-        for (const { PrcId } of permigrupo) {
+        for (const { PrcId } of data) {
           if (!roles.includes(PrcId)) roles.push(PrcId);
         }
       }
